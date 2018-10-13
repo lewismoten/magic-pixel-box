@@ -9,14 +9,14 @@
 #define SERVICE_NAME "My Service Name"
 #define SERVICE_ID "4c657769-7320-4d6f-7465-6e0000000001"
 
-#define GET_VALUE_DESCRIPTOR_TEXT "Gets the value"
-#define GET_VALUE_DESCRIPTOR_ID "4c657769-7320-4d6f-7465-6e0000000002"
-#define GET_VALUE_CHARACTERISTIC_ID "4c657769-7320-4d6f-7465-6e0000000003"
+#define VALUE_DESCRIPTOR_TEXT "Gets the value"
+#define VALUE_DESCRIPTOR_ID "4c657769-7320-4d6f-7465-6e0000000002"
+#define VALUE_CHARACTERISTIC_ID "4c657769-7320-4d6f-7465-6e0000000003"
 
 String _value = "My Original Value";
 
-BLEDescriptor getValueDescriptor(GET_VALUE_DESCRIPTOR_ID);
-BLECharacteristic getValueCharacteristic(GET_VALUE_CHARACTERISTIC_ID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE);
+BLEDescriptor myValueDescriptor(VALUE_DESCRIPTOR_ID);
+BLECharacteristic myValueCharacteristic(VALUE_CHARACTERISTIC_ID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE);
 
 bool _connected = false;
 class ServerCallbacks : public BLEServerCallbacks {
@@ -36,15 +36,15 @@ void initializeBluetoothLowEnergyService() {
   myServer->setCallbacks(new ServerCallbacks());
   BLEService *myService = myServer->createService(SERVICE_ID);
 
-  myService->addCharacteristic(&getValueCharacteristic);
-  getValueDescriptor.setValue(GET_VALUE_DESCRIPTOR_TEXT);
-  getValueCharacteristic.addDescriptor(&getValueDescriptor);
-  getValueCharacteristic.addDescriptor(new BLE2902());
+  myService->addCharacteristic(&myValueCharacteristic);
+  myValueDescriptor.setValue(VALUE_DESCRIPTOR_TEXT);
+  myValueCharacteristic.addDescriptor(&myValueDescriptor);
+  myValueCharacteristic.addDescriptor(new BLE2902());
 
   myServer->getAdvertising()->addServiceUUID(SERVICE_ID);
   myService->start();
   myServer->getAdvertising()->start();
-  getValueCharacteristic.setValue(_value.c_str());
+  myValueCharacteristic.setValue(_value.c_str());
 }
 
 void setup() {
@@ -53,8 +53,7 @@ void setup() {
 }
 
 void loop() {
-
-  String currentValue = getValueCharacteristic.getValue().c_str();
+  String currentValue = myValueCharacteristic.getValue().c_str();
   if (currentValue != _value) {
     _value = currentValue;
     Serial.print("New Value: " + currentValue);
