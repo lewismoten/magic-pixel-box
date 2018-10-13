@@ -3,21 +3,20 @@
 #include <BLEServer.h>
 #include <BLE2902.h>
 
+// If any bluetooth settings change you may need to forget and pair the device to clear cached settings
+// ie - id's, services, descriptors, characteristics, etc.
+
 #define SERVICE_NAME "My Service Name"
-#define SERVICE_ID "96e75c51-3361-49e4-9e4e-a5b270b3bc41"
+#define SERVICE_ID "4c657769-7320-4d6f-7465-6e0000000001"
 
 #define GET_VALUE_DESCRIPTOR_TEXT "Gets the value"
-#define GET_VALUE_DESCRIPTOR_ID "8d08aac3-89d6-4051-8e9c-ba43036813e2"
-#define GET_VALUE_CHARACTERISTIC_ID "8418b872-c609-4420-925b-292557fb9e73"
+#define GET_VALUE_DESCRIPTOR_ID "4c657769-7320-4d6f-7465-6e0000000002"
+#define GET_VALUE_CHARACTERISTIC_ID "4c657769-7320-4d6f-7465-6e0000000003"
 
-#define SET_VALUE_DESCRIPTOR_TEXT "Sets the value"
-#define SET_VALUE_DESCRIPTOR_ID "673e6ee0-8e29-4189-bfeb-0763de92701e"
-#define SET_VALUE_CHARACTERISTIC_ID "e4662683-ac03-4b4c-b1b3-3fba451d3356"
+String _value = "My Original Value";
 
 BLEDescriptor getValueDescriptor(GET_VALUE_DESCRIPTOR_ID);
-BLECharacteristic getValueCharacteristic(GET_VALUE_CHARACTERISTIC_ID, BLECharacteristic::PROPERTY_READ);
-BLEDescriptor setValueDescriptor(SET_VALUE_DESCRIPTOR_ID);
-BLECharacteristic setValueCharacteristic(SET_VALUE_CHARACTERISTIC_ID, BLECharacteristic::PROPERTY_WRITE);
+BLECharacteristic getValueCharacteristic(GET_VALUE_CHARACTERISTIC_ID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE);
 
 bool _connected = false;
 class ServerCallbacks : public BLEServerCallbacks {
@@ -42,14 +41,10 @@ void initializeBluetoothLowEnergyService() {
   getValueCharacteristic.addDescriptor(&getValueDescriptor);
   getValueCharacteristic.addDescriptor(new BLE2902());
 
-  myService->addCharacteristic(&setValueCharacteristic);
-  setValueDescriptor.setValue(SET_VALUE_DESCRIPTOR_TEXT);
-  setValueCharacteristic.addDescriptor(&setValueDescriptor);
-  setValueCharacteristic.addDescriptor(new BLE2902());
-
   myServer->getAdvertising()->addServiceUUID(SERVICE_ID);
   myService->start();
   myServer->getAdvertising()->start();
+  getValueCharacteristic.setValue(_value.c_str());
 }
 
 void setup() {
@@ -58,6 +53,11 @@ void setup() {
 }
 
 void loop() {
-  getValueCharacteristic.setValue("It worked!");  
+
+  String currentValue = getValueCharacteristic.getValue().c_str();
+  if (currentValue != _value) {
+    _value = currentValue;
+    Serial.print("New Value: " + currentValue);
+  }
   delay(1000);
 }
