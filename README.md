@@ -1,3 +1,5 @@
+![magic-pixel-box: 16x16 LED pixel box drawn on from a phone](docs/images/social-preview.png)
+
 # magic-pixel-box
 
 Arduino sketches for a 16x16 RGB LED pixel box (256 LEDs) that can be drawn on from a phone over Bluetooth LE.
